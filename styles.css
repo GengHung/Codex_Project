@@ -14,6 +14,12 @@
   --check: #ad998a;
   --completed: #9b8b80;
   --danger: #9b5145;
+  --priority-high-bg: #f1d1c7;
+  --priority-high-text: #8c3f35;
+  --priority-medium-bg: #f2ddbd;
+  --priority-medium-text: #755033;
+  --priority-low-bg: #e5ddd3;
+  --priority-low-text: #70645b;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -57,7 +63,7 @@ h1 {
 
 .task-form {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(120px, .55fr) auto auto auto;
+  grid-template-columns: minmax(160px, 1fr) minmax(105px, .5fr) auto auto auto auto;
   gap: 10px;
   padding: 10px;
   border: 1px solid var(--line);
@@ -325,6 +331,18 @@ h1 {
   font-size: .76rem;
   overflow-wrap: anywhere;
 }
+
+.priority {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.priority--high { background: var(--priority-high-bg); color: var(--priority-high-text); }
+.priority--medium { background: var(--priority-medium-bg); color: var(--priority-medium-text); }
+.priority--low { background: var(--priority-low-bg); color: var(--priority-low-text); }
 
 .badge {
   display: inline-block;

@@ -5,6 +5,7 @@ const form = document.querySelector("#task-form");
 const input = document.querySelector("#task-input");
 const assigneeInput = document.querySelector("#assignee-input");
 const categorySelect = document.querySelector("#category-select");
+const prioritySelect = document.querySelector("#priority-select");
 const taskList = document.querySelector("#task-list");
 const emptyState = document.querySelector("#empty-state");
 const summary = document.querySelector("#task-summary");
@@ -94,6 +95,7 @@ function exportTodayTasks() {
       <Cell><Data ss:Type="String">${escapeXml(task.text)}</Data></Cell>
       <Cell><Data ss:Type="String">${escapeXml(task.assignee || "未指派")}</Data></Cell>
       <Cell><Data ss:Type="String">${task.category === "work" ? "工作" : "生活"}</Data></Cell>
+      <Cell><Data ss:Type="String">${getTaskPriority(task)[0].toUpperCase() + getTaskPriority(task).slice(1)}</Data></Cell>
       <Cell><Data ss:Type="String">${task.completed ? "已完成" : "未完成"}</Data></Cell>
       <Cell><Data ss:Type="String">${escapeXml(task.createdAt ? new Date(task.createdAt).toLocaleString("zh-TW") : today)}</Data></Cell>
     </Row>`).join("");
@@ -108,6 +110,7 @@ function exportTodayTasks() {
         <Cell><Data ss:Type="String">任務</Data></Cell>
         <Cell><Data ss:Type="String">負責人</Data></Cell>
         <Cell><Data ss:Type="String">分類</Data></Cell>
+        <Cell><Data ss:Type="String">優先程度</Data></Cell>
         <Cell><Data ss:Type="String">狀態</Data></Cell>
         <Cell><Data ss:Type="String">新增時間</Data></Cell>
       </Row>${rows}
@@ -127,6 +130,15 @@ function exportTodayTasks() {
 function getTaskStatus(task) {
   if (["todo", "process", "done"].includes(task.status)) return task.status;
   return task.completed ? "done" : "todo";
+}
+
+function getTaskPriority(task) {
+  return ["high", "medium", "low"].includes(task.priority) ? task.priority : "medium";
+}
+
+function sortTasksByPriority(items) {
+  const rank = { high: 0, medium: 1, low: 2 };
+  return [...items].sort((a, b) => rank[getTaskPriority(a)] - rank[getTaskPriority(b)]);
 }
 
 function createTaskElement(task, draggable = false) {
@@ -156,13 +168,18 @@ function createTaskElement(task, draggable = false) {
   badge.className = `badge badge--${task.category}`;
   badge.textContent = task.category === "work" ? "工作" : "生活";
 
+  const priorityValue = getTaskPriority(task);
+  const priority = document.createElement("span");
+  priority.className = `priority priority--${priorityValue}`;
+  priority.textContent = priorityValue[0].toUpperCase() + priorityValue.slice(1);
+
   const assignee = document.createElement("span");
   assignee.className = "assignee";
   assignee.textContent = `負責人：${task.assignee || "未指派"}`;
 
   const meta = document.createElement("div");
   meta.className = "task-item__meta";
-  meta.append(badge, assignee);
+  meta.append(badge, priority, assignee);
 
   const deleteButton = document.createElement("button");
   deleteButton.className = "task-item__delete";
@@ -193,7 +210,7 @@ function createDateSection(dateKey, groupedTasks) {
 
   const list = document.createElement("ul");
   list.className = "date-section__tasks";
-  list.append(...groupedTasks.map(createTaskElement));
+  list.append(...sortTasksByPriority(groupedTasks).map(createTaskElement));
 
   header.append(title, count);
   section.append(header, list);
@@ -211,7 +228,9 @@ function createKanbanBoard(visibleTasks) {
   board.className = "kanban-board";
 
   columns.forEach(({ status, label }) => {
-    const columnTasks = visibleTasks.filter((task) => getTaskStatus(task) === status);
+    const columnTasks = sortTasksByPriority(
+      visibleTasks.filter((task) => getTaskStatus(task) === status),
+    );
     const column = document.createElement("section");
     column.className = "kanban-column";
     column.dataset.status = status;
@@ -285,6 +304,7 @@ function enterEditMode(taskId) {
   input.value = task.text;
   assigneeInput.value = task.assignee || "";
   categorySelect.value = task.category;
+  prioritySelect.value = getTaskPriority(task);
   submitButton.textContent = "修改";
   cancelButton.hidden = false;
   render();
@@ -304,11 +324,12 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = input.value.trim();
   const assignee = assigneeInput.value.trim();
+  const priority = prioritySelect.value;
   if (!text || !assignee) return;
 
   if (editingTaskId) {
     tasks = tasks.map((task) => task.id === editingTaskId
-      ? { ...task, text, assignee, category: categorySelect.value }
+      ? { ...task, text, assignee, category: categorySelect.value, priority }
       : task);
   } else {
     tasks.unshift({
@@ -316,6 +337,7 @@ form.addEventListener("submit", (event) => {
       text,
       assignee,
       category: categorySelect.value,
+      priority,
       completed: false,
       status: "todo",
       createdAt: new Date().toISOString(),
