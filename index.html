@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="簡約的本地待辦清單">
+  <title>待辦清單</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="app__header">
+      <p class="eyebrow">MY TASKS</p>
+      <h1>待辦清單</h1>
+      <p id="task-summary" class="summary">今天要完成什麼？</p>
+    </header>
+
+    <form id="task-form" class="task-form">
+      <label class="sr-only" for="task-input">任務名稱</label>
+      <input id="task-input" type="text" maxlength="120" placeholder="輸入新的任務…" autocomplete="off" required>
+
+      <label class="sr-only" for="assignee-input">負責人</label>
+      <input id="assignee-input" type="text" maxlength="50" placeholder="負責人" autocomplete="name" required>
+
+      <label class="sr-only" for="category-select">任務分類</label>
+      <select id="category-select">
+        <option value="work">工作</option>
+        <option value="life">生活</option>
+      </select>
+
+      <button id="submit-button" type="submit">新增</button>
+      <button id="cancel-button" class="cancel-button" type="button" hidden>取消</button>
+    </form>
+
+    <div class="toolbar">
+      <nav class="filters" aria-label="分類篩選">
+        <button class="filter active" type="button" data-filter="all">全部</button>
+        <button class="filter" type="button" data-filter="work">工作</button>
+        <button class="filter" type="button" data-filter="life">生活</button>
+      </nav>
+      <div class="toolbar__actions">
+        <div class="view-switcher" aria-label="檢視模式">
+          <button class="view-button active" type="button" data-view="list" aria-pressed="true">清單</button>
+          <button class="view-button" type="button" data-view="card" aria-pressed="false">卡片</button>
+          <button class="view-button" type="button" data-view="board" aria-pressed="false">看板</button>
+        </div>
+        <button id="export-button" class="export-button" type="button">匯出今日 Excel</button>
+      </div>
+    </div>
+
+    <div id="task-list" class="task-list view--list" aria-live="polite"></div>
+
+    <div id="empty-state" class="empty-state">
+      <div class="empty-state__mark">✓</div>
+      <p>目前沒有待辦事項</p>
+      <span>新增一項任務，開始安排今天。</span>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
